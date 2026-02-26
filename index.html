@@ -32,6 +32,14 @@
         }
         .slider-control label { display: block; margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8; }
         .slider-control input[type="range"] { width: 100%; cursor: pointer; }
+        #settings-view label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-align: left;
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -48,11 +56,15 @@
         <div id="settings-view" class="card" style="display: none;">
             <h2>Settings</h2>
             <p>Enter comma-separated words for each dropdown.</p>
-            <input type="password" id="api-key-input" placeholder="Enter Gemini API Key (Optional)" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #555; background: #333; color: white;">
+            <label for="api-key-input">Gemini API Key</label>
+            <input type="password" id="api-key-input" placeholder="Optional, for AI-powered topics" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #555; background: #333; color: white;">
             <div class="settings-inputs">
+                <label for="words1">Dropdown 1 Words</label>
                 <textarea id="words1" placeholder="Words for Dropdown 1..."></textarea>
+                <label for="words2">Dropdown 2 Words</label>
                 <textarea id="words2" placeholder="Words for Dropdown 2..."></textarea>
-                <textarea id="words3" placeholder="Words for Dropdown 3..."></textarea>
+                <label for="custom-prompt-input">Custom Prompt Add-on</label>
+                <textarea id="custom-prompt-input" placeholder="e.g., 'Make it funny' or 'Keep it professional.'" style="height: 80px; margin-top: 10px; border-color: #646cff;"></textarea>
             </div>
             <div class="settings-actions">
                 <button id="save-settings-btn">Save</button>
@@ -71,8 +83,8 @@
                 <input type="text" id="custom-word-input" placeholder="Enter a word">
             </div>
             <div class="slider-control">
-                <label for="creativity-slider">Creativity: <span id="creativity-value">0.7</span></label>
-                <input type="range" id="creativity-slider" min="0" max="1" step="0.1" value="0.7">
+                <label for="creativity-slider">Creativity / Difficulty (Dice Roll): <span id="creativity-value">6</span></label>
+                <input type="range" id="creativity-slider" min="0" max="12" step="1" value="6">
             </div>
             <button id="generate-btn">Generate Topic</button>
         </div>

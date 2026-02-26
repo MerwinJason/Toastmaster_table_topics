@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customWordInput = document.getElementById('custom-word-input');
     const words1Input = document.getElementById('words1');
     const words2Input = document.getElementById('words2');
-    const words3Input = document.getElementById('words3');
+    const customPromptInput = document.getElementById('custom-prompt-input');
     const apiKeyInput = document.getElementById('api-key-input');
     const creativitySlider = document.getElementById('creativity-slider');
     const creativityValue = document.getElementById('creativity-value');
@@ -26,9 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default words
     const defaultWords = {
         words1: ['Fear', 'Failure', 'Success', 'Joy', 'Courage', 'Technology'],
-        words2: ['Publicly', 'Privately', 'Silently', 'Loudly', 'Unexpectedly', 'Intentionally'],
-        words3: ['Survival', 'Growth', 'Happiness', 'Innovation', 'Regret', 'Connection']
+        words2: ['Publicly', 'Privately', 'Silently', 'Loudly', 'Unexpectedly', 'Intentionally']
     };
+
+    // Default Custom Prompt Add-on
+    const defaultCustomPrompt = "Ensure the question is engaging, coherent, and makes sense. Reply with a single topic only.";
 
     // --- State Management ---
     let words = {};
@@ -65,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateSettingsInputs() {
         words1Input.value = words.words1.join(', ');
         words2Input.value = words.words2.join(', ');
-        words3Input.value = words.words3.join(', ');
         apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
+        customPromptInput.value = localStorage.getItem('tableTopicsCustomPrompt') || defaultCustomPrompt;
     }
 
 
@@ -86,8 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const word1 = dropdown1.value;
         const word2 = dropdown2.value;
         const word3 = customWordInput.value.trim();
-        const creativity = parseFloat(creativitySlider.value);
+        const creativity = parseInt(creativitySlider.value); // 0 to 12
+        const temperature = creativity / 12; // Map 0-12 to 0.0-1.0 for API
         const apiKey = localStorage.getItem('geminiApiKey');
+        const customPromptAddOn = localStorage.getItem('tableTopicsCustomPrompt') || defaultCustomPrompt;
 
         if (!word3) {
             generatedTopicEl.textContent = "Please enter a word in the text box.";
@@ -97,14 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (apiKey) {
             // Real AI Call
             try {
-                const prompt = `Create a creative, engaging, and coherent table topic question for a Toastmasters meeting that incorporates these three elements: "${word1}", "${word2}", and "${word3}". The question should make sense and not just be a random combination. the words can be utilized in any order such that it makes sense. Reply with a single topic. Nothing more and nothing less. Max word limit is 30. The creativity level is set to ${creativity} (0 being conservative, 1 being very imaginative), so please adjust the tone accordingly. Additionally the creativity slider will be used for making the topic easier or harder to speak on. So first time speakers might use a low creativity score to get a topic which is easy to talk on and advanced speakers could use a high creativity score to make it more challenging for them and also for you to generate a very creative table topic which wows the audience and makes the speaker think for a while to even get it`;
+                const prompt = `Create a table topic question incorporating these words: "${word1}", "${word2}", and "${word3}". Max word limit is 30. The difficulty level is set to ${creativity} on a scale of 0 to 12 (simulating a dice roll). A low number means an easy/literal question. A high number (like rolling a 12) means a highly abstract, difficult, or metaphorical question. ${customPromptAddOn}`;
                 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: creativity }
+                        generationConfig: { temperature: temperature }
                     })
                 });
 
@@ -175,10 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveSettingsBtn.addEventListener('click', () => {
-        words.words1 = words1Input.value.split(',').map(w => w.trim()).filter(Boolean);
-        words.words2 = words2Input.value.split(',').map(w => w.trim()).filter(Boolean);
-        words.words3 = words3Input.value.split(',').map(w => w.trim()).filter(Boolean);
+        words = {
+            words1: words1Input.value.split(',').map(w => w.trim()).filter(Boolean),
+            words2: words2Input.value.split(',').map(w => w.trim()).filter(Boolean)
+        };
         localStorage.setItem('geminiApiKey', apiKeyInput.value.trim());
+        localStorage.setItem('tableTopicsCustomPrompt', customPromptInput.value.trim());
         
         saveWordsToLocalStorage();
         populateDropdowns();
